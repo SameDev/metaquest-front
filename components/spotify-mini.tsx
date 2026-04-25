@@ -1,7 +1,6 @@
-import { View, Text, Pressable, StyleSheet, Image, ActivityIndicator, Alert, Clipboard } from 'react-native';
-import { Music, SkipBack, SkipForward, Pause, Play, Copy } from 'lucide-react-native';
+import { View, Text, Pressable, StyleSheet, Image, ActivityIndicator } from 'react-native';
+import { Music, SkipBack, SkipForward, Pause, Play } from 'lucide-react-native';
 import { colors, fontSize, radius, spacing } from '@/constants/theme';
-import { REDIRECT_URI } from '@/hooks/use-spotify';
 import type { SpotifyPlaybackState, SpotifyPlaylist } from '@/lib/spotify';
 
 interface SpotifyMiniProps {
@@ -59,22 +58,7 @@ export function SpotifyMini({
           </Pressable>
         </View>
 
-        {/* Redirect URI helper */}
-        <View style={styles.redirectBox}>
-          <Text style={styles.redirectLabel}>
-            📋 Adicione este URI no Spotify Dashboard → Redirect URIs:
-          </Text>
-          <Pressable
-            style={styles.redirectUri}
-            onPress={() => {
-              Clipboard.setString(REDIRECT_URI);
-              Alert.alert('Copiado!', 'Cole em developer.spotify.com → seu app → Redirect URIs');
-            }}
-          >
-            <Text style={styles.redirectUriText} numberOfLines={1}>{REDIRECT_URI}</Text>
-            <Copy size={14} color={colors.accent} />
-          </Pressable>
-        </View>
+
       </View>
     );
   }
@@ -199,35 +183,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   connectBtnDisabled: { opacity: 0.5 },
-  redirectBox: {
-    backgroundColor: colors.bgInput,
-    borderRadius: radius.md,
-    padding: spacing.md,
-    gap: spacing.sm,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  redirectLabel: {
-    color: colors.textMuted,
-    fontSize: fontSize.xs,
-    lineHeight: 18,
-  },
-  redirectUri: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    backgroundColor: colors.bgCard,
-    borderRadius: radius.sm,
-    padding: spacing.sm,
-    borderWidth: 1,
-    borderColor: colors.accent + '40',
-  },
-  redirectUriText: {
-    flex: 1,
-    color: colors.accentGlow,
-    fontSize: fontSize.xs,
-    fontFamily: 'monospace',
-  },
   connectText: {
     color: '#FFF',
     fontWeight: '700',
