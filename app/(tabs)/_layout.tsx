@@ -70,6 +70,7 @@ export default function TabLayout() {
       <Tabs.Screen name="activities" />
       <Tabs.Screen name="notes" />
       <Tabs.Screen name="profile" />
+      <Tabs.Screen name="create" options={{ href: null }} />
     </Tabs>
   );
 }
