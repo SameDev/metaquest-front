@@ -10,7 +10,7 @@ import {
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
+import Animated, { FadeInDown, FadeInUp, FadeIn } from 'react-native-reanimated';
 import { Trophy, Flame, Zap, CheckCircle, Star, Clipboard } from 'lucide-react-native';
 import { useTasks, useCompleteTask, useDeleteTask } from '@/hooks/use-tasks';
 import { useProfile } from '@/hooks/use-profile';
@@ -19,8 +19,10 @@ import { xpToNextLevel, xpProgressInLevel } from '@/lib/gamification';
 import { XPBar } from '@/components/xp-bar';
 import { StatBadge } from '@/components/stat-badge';
 import { TaskCard } from '@/components/task-card';
+import { ConfettiBlast } from '@/components/confetti-blast';
+import { LevelUpToast } from '@/components/level-up-toast';
 import { colors, fontSize, spacing, radius } from '@/constants/theme';
-import type { TaskWithCompletion } from '@/types/database';
+import type { TaskWithCompletion, CompleteTaskResult } from '@/types/database';
 
 type Filter = 'all' | 'pending' | 'done';
 
@@ -41,7 +43,7 @@ function getMotivation(pending: number, done: number): string {
   if (pending === 0) return 'Tudo feito! Você arrasou hoje';
   const pct = Math.round((done / total) * 100);
   if (pct >= 75) return `${pct}% completo — quase lá!`;
-  if (pct >= 50) return `Metade feita, continue!`;
+  if (pct >= 50) return 'Metade feita, continue!';
   return `${done} de ${total} ${done === 1 ? 'feita' : 'feitas'} — vai em frente`;
 }
 
@@ -52,7 +54,13 @@ export default function HomeScreen() {
   const deleteTask = useDeleteTask();
   const { signOut } = useAuth();
   const completingTaskId = useRef<string | null>(null);
+  const profileRef = useRef(profile);
+  profileRef.current = profile;
+
   const [filter, setFilter] = useState<Filter>('all');
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [showLevelUp, setShowLevelUp] = useState(false);
+  const [newLevel, setNewLevel] = useState(1);
 
   const isRefreshing = tasksLoading || profileLoading;
 
@@ -64,7 +72,15 @@ export default function HomeScreen() {
   const handleComplete = useCallback((task: TaskWithCompletion) => {
     if (completingTaskId.current === task.id) return;
     completingTaskId.current = task.id;
+    const prevLevel = profileRef.current?.level ?? 1;
     completeTask.mutate(task, {
+      onSuccess: (result: CompleteTaskResult) => {
+        setShowConfetti(true);
+        if (result.user.level > prevLevel) {
+          setNewLevel(result.user.level);
+          setShowLevelUp(true);
+        }
+      },
       onSettled: () => { completingTaskId.current = null; },
     });
   }, [completeTask]);
@@ -103,6 +119,8 @@ export default function HomeScreen() {
 
     return { filtered, pendingCount: pending.length, doneCount: done.length };
   }, [tasks, filter]);
+
+  const allDone = pendingCount === 0 && doneCount > 0;
 
   const renderItem = useCallback(({ item, index }: { item: TaskWithCompletion; index: number }) => (
     <TaskCard
@@ -161,6 +179,17 @@ export default function HomeScreen() {
           </View>
           <XPBar currentXP={xpProgress} maxXP={xpNeeded} level={level} />
         </Animated.View>
+
+        {/* All done banner */}
+        {allDone && (
+          <Animated.View entering={FadeIn.duration(400)} style={styles.allDoneBanner}>
+            <Text style={styles.allDoneEmoji}>🏆</Text>
+            <View style={styles.allDoneText}>
+              <Text style={styles.allDoneTitle}>Missão cumprida!</Text>
+              <Text style={styles.allDoneSub}>Todas as tarefas de hoje concluídas</Text>
+            </View>
+          </Animated.View>
+        )}
 
         {/* Filters */}
         <Animated.View entering={FadeInUp.delay(160).springify().damping(18)} style={styles.filterRow}>
@@ -226,6 +255,13 @@ export default function HomeScreen() {
           }
         />
       </SafeAreaView>
+
+      {showConfetti && (
+        <ConfettiBlast onFinish={() => setShowConfetti(false)} />
+      )}
+      {showLevelUp && (
+        <LevelUpToast level={newLevel} onFinish={() => setShowLevelUp(false)} />
+      )}
     </GestureHandlerRootView>
   );
 }
@@ -270,6 +306,30 @@ const styles = StyleSheet.create({
   badges: {
     flexDirection: 'row',
     gap: spacing.sm,
+  },
+  allDoneBanner: {
+    marginHorizontal: spacing.lg,
+    marginBottom: spacing.sm,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    backgroundColor: colors.success + '15',
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.success + '40',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm + 2,
+  },
+  allDoneEmoji: { fontSize: 28 },
+  allDoneText: { gap: 2 },
+  allDoneTitle: {
+    color: colors.success,
+    fontSize: fontSize.md,
+    fontWeight: '800',
+  },
+  allDoneSub: {
+    color: colors.textMuted,
+    fontSize: fontSize.xs,
   },
   filterRow: {
     flexDirection: 'row',

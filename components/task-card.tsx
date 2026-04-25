@@ -83,21 +83,21 @@ export function TaskCard({ task, onComplete, onEdit, onDelete, isCompleting, ind
 
     setShowXP(true);
     xpOpacity.value = withSequence(
-      withTiming(1, { duration: 200 }),
-      withTiming(1, { duration: 700 }),
-      withTiming(0, { duration: 400 }),
+      withTiming(1, { duration: 150 }),
+      withTiming(1, { duration: 800 }),
+      withTiming(0, { duration: 350 }),
     );
     xpTranslateY.value = withSequence(
       withTiming(0, { duration: 0 }),
-      withTiming(-48, { duration: 1300 }),
+      withTiming(-72, { duration: 1300 }),
     );
-    scale.value = withSequence(withSpring(0.96), withSpring(1, { damping: 10 }));
+    scale.value = withSequence(withSpring(0.95), withSpring(1, { damping: 8 }));
     btnScale.value = withSequence(
-      withSpring(0.7, { damping: 8 }),
-      withSpring(1.2, { damping: 10 }),
+      withSpring(0.6, { damping: 8 }),
+      withSpring(1.3, { damping: 8 }),
       withSpring(1, { damping: 12 }),
     );
-    setTimeout(() => runOnJS(setShowXP)(false), 1400);
+    setTimeout(() => runOnJS(setShowXP)(false), 1450);
 
     onComplete(task);
   }, [task, isCompleting, onComplete, closeSwipe, xpOpacity, xpTranslateY, scale, btnScale]);
@@ -209,8 +209,10 @@ export function TaskCard({ task, onComplete, onEdit, onDelete, isCompleting, ind
           </Animated.View>
 
           {showXP && (
-            <Animated.View style={[styles.xpPopup, xpAnimStyle]}>
-              <Text style={[styles.xpPopupText, { color: diffColor }]}>+{xpReward} XP</Text>
+            <Animated.View style={[styles.xpPopup, xpAnimStyle]} pointerEvents="none">
+              <Text style={[styles.xpPopupText, { color: diffColor, textShadowColor: diffColor }]}>
+                +{xpReward} XP
+              </Text>
             </Animated.View>
           )}
         </Animated.View>
@@ -339,15 +341,17 @@ const styles = StyleSheet.create({
   },
   xpPopup: {
     position: 'absolute',
-    right: spacing.lg,
-    top: -8,
+    alignSelf: 'center',
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    top: -4,
     zIndex: 10,
   },
   xpPopupText: {
-    fontSize: fontSize.xl,
+    fontSize: fontSize['2xl'],
     fontWeight: '900',
-    textShadowColor: 'rgba(0,0,0,0.5)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 4,
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 12,
   },
 });
