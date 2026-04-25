@@ -1,13 +1,25 @@
+import { useEffect } from 'react';
 import { Tabs } from 'expo-router';
-import { colors, fontSize, radius } from '@/constants/theme';
+import { colors, radius } from '@/constants/theme';
 import { Platform, View, StyleSheet } from 'react-native';
 import { ListTodo, Target, PlusCircle, BookOpen, User } from 'lucide-react-native';
+import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 
-function TabIcon({ icon, focused, color }: { icon: React.ReactNode; focused: boolean; color: string }) {
+function TabIcon({ icon, focused }: { icon: React.ReactNode; focused: boolean }) {
+  const scale = useSharedValue(focused ? 1 : 0.8);
+
+  useEffect(() => {
+    scale.value = withSpring(focused ? 1 : 0.8, { damping: 13, stiffness: 220 });
+  }, [focused, scale]);
+
+  const animStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
   return (
-    <View style={[styles.iconWrap, focused && styles.iconWrapActive]}>
+    <Animated.View style={[styles.iconWrap, focused && styles.iconActive, animStyle]}>
       {icon}
-    </View>
+    </Animated.View>
   );
 }
 
@@ -16,19 +28,16 @@ export default function TabLayout() {
     <Tabs
       screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarActiveTintColor: colors.accent,
+        tabBarShowLabel: false,
+        tabBarActiveTintColor: '#FFFFFF',
         tabBarInactiveTintColor: colors.textDim,
         tabBarStyle: {
           backgroundColor: colors.bgCard,
           borderTopColor: colors.border,
           borderTopWidth: 1,
-          height: Platform.OS === 'ios' ? 88 : 64,
-          paddingBottom: Platform.OS === 'ios' ? 28 : 8,
-          paddingTop: 8,
-        },
-        tabBarLabelStyle: {
-          fontSize: fontSize.xs,
-          fontWeight: '600',
+          height: Platform.OS === 'ios' ? 90 : 68,
+          paddingBottom: Platform.OS === 'ios' ? 28 : 10,
+          paddingTop: 10,
         },
         tabBarIcon: ({ color, focused }) => {
           const icons: Record<string, React.ReactNode> = {
@@ -38,30 +47,28 @@ export default function TabLayout() {
             notes: <BookOpen size={22} color={color} />,
             profile: <User size={22} color={color} />,
           };
-          return (
-            <TabIcon icon={icons[route.name]} focused={focused} color={color} />
-          );
+          return <TabIcon icon={icons[route.name]} focused={focused} />;
         },
       })}
     >
-      <Tabs.Screen name="index" options={{ title: 'Missões' }} />
-      <Tabs.Screen name="focus" options={{ title: 'Foco' }} />
-      <Tabs.Screen name="create" options={{ title: 'Nova' }} />
-      <Tabs.Screen name="notes" options={{ title: 'Notas' }} />
-      <Tabs.Screen name="profile" options={{ title: 'Perfil' }} />
+      <Tabs.Screen name="index" />
+      <Tabs.Screen name="focus" />
+      <Tabs.Screen name="create" />
+      <Tabs.Screen name="notes" />
+      <Tabs.Screen name="profile" />
     </Tabs>
   );
 }
 
 const styles = StyleSheet.create({
   iconWrap: {
-    width: 36,
-    height: 28,
+    width: 48,
+    height: 38,
+    borderRadius: radius.full,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: radius.md,
   },
-  iconWrapActive: {
-    backgroundColor: colors.accent + '20',
+  iconActive: {
+    backgroundColor: colors.accent,
   },
 });

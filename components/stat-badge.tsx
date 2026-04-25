@@ -34,18 +34,18 @@ export function StatBadge({
   return (
     <Animated.View
       entering={FadeInDown.delay(delay).springify().damping(14)}
-      style={animatedStyle}
+      style={[animatedStyle, styles.flex]}
     >
       <AnimatedPressable
-        style={[styles.container, { borderColor: color + '30' }]}
+        style={[styles.container, { borderColor: color + '28' }]}
         onPressIn={() => { scale.value = withSpring(0.93, { damping: 15 }); }}
         onPressOut={() => { scale.value = withSpring(1, { damping: 12 }); }}
       >
         <Animated.View style={[styles.iconWrap, { backgroundColor: color + '18' }]}>
           {icon}
         </Animated.View>
-        <Animated.View>
-          <Text style={[styles.value, { color }]}>{value}</Text>
+        <Animated.View style={styles.textBlock}>
+          <Text style={[styles.value, { color }]} numberOfLines={1}>{value}</Text>
           <Text style={styles.label}>{label}</Text>
         </Animated.View>
       </AnimatedPressable>
@@ -54,32 +54,40 @@ export function StatBadge({
 }
 
 const styles = StyleSheet.create({
+  flex: { flex: 1 },
   container: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
     backgroundColor: colors.bgCard,
-    paddingHorizontal: spacing.md,
+    paddingHorizontal: spacing.sm + 4,
     paddingVertical: spacing.sm + 2,
     borderRadius: radius.lg,
     borderWidth: 1,
   },
   iconWrap: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
+    flexShrink: 0,
+  },
+  textBlock: {
+    flex: 1,
+    gap: 1,
   },
   value: {
-    fontSize: fontSize.lg,
+    fontSize: fontSize.xl,
     fontWeight: '800',
+    letterSpacing: -0.5,
   },
   label: {
-    fontSize: fontSize.xs,
+    fontSize: 10,
     color: colors.textDim,
     fontWeight: '600',
     textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    letterSpacing: 0.6,
   },
 });
