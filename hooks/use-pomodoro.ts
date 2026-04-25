@@ -67,6 +67,14 @@ export function usePomodoro(settings: PomodoroSettings = DEFAULT_SETTINGS) {
   const endTimeRef = useRef<number | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const notifIdRef = useRef<string | null>(null);
+  const keepAwakeActive = useRef(false);
+
+  const safeDeactivateKeepAwake = useCallback(() => {
+    if (keepAwakeActive.current) {
+      KeepAwake.deactivateKeepAwake();
+      keepAwakeActive.current = false;
+    }
+  }, []);
 
   const duration = getDuration(phase, settings);
 
@@ -100,7 +108,7 @@ export function usePomodoro(settings: PomodoroSettings = DEFAULT_SETTINGS) {
       if (intervalRef.current) clearInterval(intervalRef.current);
       setIsRunning(false);
       endTimeRef.current = null;
-      KeepAwake.deactivateKeepAwake();
+      safeDeactivateKeepAwake();
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
       setPhase((cur) => {
@@ -120,7 +128,10 @@ export function usePomodoro(settings: PomodoroSettings = DEFAULT_SETTINGS) {
     endTimeRef.current = Date.now() + remaining * 1000;
     intervalRef.current = setInterval(tick, 500);
     setIsRunning(true);
-    KeepAwake.activateKeepAwake();
+    if (!keepAwakeActive.current) {
+      KeepAwake.activateKeepAwake();
+      keepAwakeActive.current = true;
+    }
     scheduleNotification(remaining, phase);
   }, [remaining, tick, phase, scheduleNotification]);
 
@@ -128,9 +139,9 @@ export function usePomodoro(settings: PomodoroSettings = DEFAULT_SETTINGS) {
     if (intervalRef.current) clearInterval(intervalRef.current);
     setIsRunning(false);
     endTimeRef.current = null;
-    KeepAwake.deactivateKeepAwake();
+    safeDeactivateKeepAwake();
     cancelNotification();
-  }, [cancelNotification]);
+  }, [cancelNotification, safeDeactivateKeepAwake]);
 
   const reset = useCallback(() => {
     pause();
@@ -156,9 +167,9 @@ export function usePomodoro(settings: PomodoroSettings = DEFAULT_SETTINGS) {
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
       cancelNotification();
-      KeepAwake.deactivateKeepAwake();
+      safeDeactivateKeepAwake();
     };
-  }, [cancelNotification]);
+  }, [cancelNotification, safeDeactivateKeepAwake]);
 
   const progress = 1 - remaining / duration;
   const minutes = Math.floor(remaining / 60);

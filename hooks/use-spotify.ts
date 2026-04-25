@@ -16,11 +16,11 @@ WebBrowser.maybeCompleteAuthSession();
 
 const isExpoGo = Constants.appOwnership === 'expo';
 
-// Dev (Expo Go): add  https://auth.expo.io/@samedev/focus  to Spotify Dashboard
-// Production:   add  focus://spotify-callback  to Spotify Dashboard
+// Dev (Expo Go): add  exp://localhost:8081/--/spotify-callback  to Spotify Dashboard
+// Production:   add  disciplineos://spotify-callback  to Spotify Dashboard
 export const REDIRECT_URI = isExpoGo
   ? 'exp://localhost:8081/--/spotify-callback'
-  : 'focus://spotify-callback';
+  : 'disciplineos://spotify-callback';
 
 async function generatePKCE() {
   const raw = Crypto.randomUUID() + Crypto.randomUUID();

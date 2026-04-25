@@ -31,13 +31,17 @@ const FILTERS: { key: Filter; label: string }[] = [
 
 function getMotivation(pending: number, done: number): string {
   const total = pending + done;
-  if (total === 0) return 'Crie sua primeira missão 🎯';
-  if (done === 0) return `${pending} missão${pending > 1 ? 'ões' : ''} te aguarda${pending > 1 ? 'm' : ''}! ⚡`;
-  if (pending === 0) return 'Tudo feito! Você arrasou hoje 🏆';
+  if (total === 0) return 'Crie sua primeira missão';
+  if (done === 0) {
+    const word = pending === 1 ? 'missão' : 'missões';
+    const verb = pending === 1 ? 'te aguarda' : 'te aguardam';
+    return `${pending} ${word} ${verb}`;
+  }
+  if (pending === 0) return 'Tudo feito! Você arrasou hoje';
   const pct = Math.round((done / total) * 100);
-  if (pct >= 75) return `${pct}% completo — quase lá! 🔥`;
-  if (pct >= 50) return `Metade feita! Continue 💪`;
-  return `${done} de ${total} feita${done > 1 ? 's' : ''} — vai em frente ⚔️`;
+  if (pct >= 75) return `${pct}% completo — quase lá!`;
+  if (pct >= 50) return `Metade feita, continue!`;
+  return `${done} de ${total} ${done === 1 ? 'feita' : 'feitas'} — vai em frente`;
 }
 
 export default function HomeScreen() {
@@ -119,7 +123,7 @@ export default function HomeScreen() {
         {/* Header */}
         <View style={styles.header}>
           <View>
-            <Text style={styles.heroTitle}>MetaQuest</Text>
+            <Text style={styles.heroTitle}>DisciplineOS</Text>
             <Text style={styles.motivation}>
               {getMotivation(pendingCount, doneCount)}
             </Text>

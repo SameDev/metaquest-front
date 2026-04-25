@@ -101,7 +101,7 @@ export default function NotesScreen() {
     if (saveTimer.current) clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(() => {
       upsert(type, currentKey.current, text);
-    }, 800);
+    }, 2000);
   }, [upsert, type]);
 
   const switchType = (t: NoteType) => {

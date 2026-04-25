@@ -74,6 +74,9 @@ export function useDeleteTask() {
     onError: (_err, _id, ctx) => {
       if (ctx?.prev) queryClient.setQueryData(['tasks'], ctx.prev);
     },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['profile'] });
+    },
   });
 }
 
